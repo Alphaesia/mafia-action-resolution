@@ -81,14 +81,16 @@ class Ability:
 		print("""	resolved: %s""" % self.resolved)
 		print("""	modifiable: %s""" % self.modifiable)
 		print("""	modified_by: %s""" % self.modified_by)
+		print("""	actions: [""")
 
 		for action in self.actions:
-			print("""	action: %s""" % action)
-			print("""		type: %s""" % action.type)
-			print("""		target: %s (%s)""" % (action.target.__name__(), action.target))
-			print("""		component: %s""" % action.component)
-			print("""		new_value: %s""" % action.new_value)
+			print("""		action: %s""" % action)
+			print("""			type: %s""" % action.type)
+			print("""			target: %s (%s)""" % (action.target.__name__(), action.target))
+			print("""			component: %s""" % action.component)
+			print("""			new_value: %s""" % action.new_value)
 
+		print("""	]""")
 		print("""	return_message: %s""" % self.return_message)
 		print("""	priority: %s""" % self.priority)
 		print("")
