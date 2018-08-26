@@ -98,4 +98,6 @@ class BlockRole(Ability):
 		self.caster = caster
 		for target in targets:
 			for ability in target.cast_abilities:
-				self.actions.append(Action("alter", target.ability, "executed", False))
+				print(target)
+				print(ability)
+				self.actions.append(Action("alter", ability, "executed", False))
