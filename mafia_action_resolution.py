@@ -9,8 +9,8 @@ PlayerB = player.Player("yeroc424", "mafia", roles.RoleCop())
 players.extend((PlayerA, PlayerB))
 
 # Cast abilities
-PlayerA.cast(PlayerA.role.abilities["investigate"], [PlayerB])
-PlayerB.cast(PlayerB.role.abilities["investigate"], [PlayerA])
+PlayerA.cast(PlayerA.role.abilities["investigate"], (PlayerB, PlayerA))
+PlayerB.cast(PlayerB.role.abilities["investigate"], (PlayerA, PlayerB))
 
 # Resolve abilities
 for player in players:

@@ -6,10 +6,8 @@ class Ability:
 		self.resolved = False
 		self.modifiable = True
 		self.modified_by = []
-		#self.target = None
 		self.actions = []
-		self.returned_value = None
-		self.return_message = "No result"
+		self.return_message = ""
 		self.priority = 0
 
 	def print_components(self):
@@ -28,6 +26,7 @@ class Ability:
 			print("""			target: %s (%s)""" % (action.target.__name__(), action.target))
 			print("""			component: %s""" % action.component)
 			print("""			new_value: %s""" % action.new_value)
+			print("""			returned_value: %s""" % action.returned_value)
 
 		print("""	]""")
 		print("""	return_message: %s""" % self.return_message)
@@ -40,10 +39,11 @@ class Ability:
 				pass
 			else:
 				if (action.type == "get"):
-					self.returned_value = getattr(action.target, action.component)
-					self.interpret_results(action)
-					self.success = True
-					self.resolved = True
+					action.returned_value = getattr(action.target, action.component)
+					self.return_message += str(self.interpret_results(action))
+
+			self.success = True
+			self.resolved = True
 
 	def interpret_results(self):
 		NotImplemented
@@ -58,6 +58,7 @@ class Action:
 			self.new_value = new_value
 		else:
 			self.new_value = None
+		self.returned_value = None
 
 
 
@@ -72,7 +73,7 @@ class InvestigateAlignment(Ability):
 			self.actions.append(Action("get", target, "alignment"))
 
 	def interpret_results(self, action):
-		self.return_message = "%s investigated %s and found them to be %s." % (self.caster.__name__(), action.target.__name__(), self.returned_value)
+		return "You investigated %s and found them to be %s. " % (action.target.__name__(), action.returned_value)
 
 class InvestigateRole(Ability):
 	def __init__(self, caster, targets):
@@ -86,9 +87,7 @@ class InvestigateRole(Ability):
 		# self.action = Action("get", "role")
 
 	def interpret_results(self, action):
-		# Takes the object grabbed by the action and gets the name of its class
-		role_name = self.returned_value.__class__.__name__
-		self.return_message = "%s investigated %s and found them to be a %s." % (self.caster.__name__(), action.target.__name__(), role_name)
+		return "You investigated %s and found them to be a %s. " % (action.target.__name__(), action.returned_value.__class__.__name__)
 
 
 class BlockRole(Ability):
