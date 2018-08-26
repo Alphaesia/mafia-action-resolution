@@ -48,6 +48,14 @@ class RoleCop(Role):
 		super().__init__()
 		self.abilities = {"investigate": self.investigateRole}
 
+class Roleblocker(Role):
+	def blockRole(self, caster, target):
+		return BlockRole(caster, target)
+
+	def __init__(self):
+		super().__init__()
+		self.abilities = {"block": self.blockRole}
+
 
 
 
@@ -65,23 +73,24 @@ class Ability:
 		self.return_message = "No result"
 		self.priority = 0
 
-	def get_components(self):
+	def print_components(self):
 		print("Ability: %s (%s)" % (self.__class__.__name__, self))
-		print("caster: %s (%s)" % (self.caster.__name__(), self.caster))
-		print("executed: %s" % self.executed)
-		print("success: %s" % self.success)
-		print("resolved: %s" % self.resolved)
-		print("modifiable: %s" % self.modifiable)
-		print("modified_by: %s" % self.modified_by)
+		print("""	caster: %s (%s)""" % (self.caster.__name__(), self.caster))
+		print("""	executed: %s""" % self.executed)
+		print("""	success: %s""" % self.success)
+		print("""	resolved: %s""" % self.resolved)
+		print("""	modifiable: %s""" % self.modifiable)
+		print("""	modified_by: %s""" % self.modified_by)
 
 		for action in self.actions:
-			print("action: %s" % action)
-			print("""	type: %s""" % action.type)
-			print("""	target: %s (%s)""" % (action.target.__name__(), action.target))
-			print("""	component: %s""" % action.component)
+			print("""	action: %s""" % action)
+			print("""		type: %s""" % action.type)
+			print("""		target: %s (%s)""" % (action.target.__name__(), action.target))
+			print("""		component: %s""" % action.component)
+			print("""		new_value: %s""" % action.new_value)
 
-		print("return_message: " + str(self.return_message))
-		print("priority: " + str(self.priority))
+		print("""	return_message: %s""" % self.return_message)
+		print("""	priority: %s""" % self.priority)
 		print("")
 
 	def resolve(self):
@@ -100,10 +109,14 @@ class Ability:
 
 
 class Action:
-	def __init__(self, type, target, component):
+	def __init__(self, type, target, component, *new_value):
 		self.type = type
 		self.target = target
 		self.component = component
+		if new_value:
+			self.new_value = new_value
+		else:
+			self.new_value = None
 
 
 
@@ -137,14 +150,15 @@ class InvestigateRole(Ability):
 		self.return_message = "%s investigated %s and found them to be a %s." % (self.caster.__name__(), action.target.__name__(), role_name)
 
 
-class Kill(Ability):
-	def __init__(self, caster, target):
+class BlockRole(Ability):
+	def __init__(self, caster, targets):
 		# Initialises variables from superclass
 		super().__init__()
 
 		self.caster = caster
-		self.target = target
-		self.action = Action("alter", "status")
+		for target in targets:
+			for ability in target.cast_abilities:
+				self.actions.append(Action("alter", target.ability, "executed", False))
 
 
 PlayerA = Player("CreepaShadowz", "innocent", Detective())
@@ -160,5 +174,4 @@ PlayerB.cast(PlayerB.role.abilities["investigate"], [PlayerA])
 for player in players:
 	for ability in player.cast_abilities:
 		ability.resolve()
-		print(ability.return_message)
-		ability.get_components()
+		ability.print_components()
