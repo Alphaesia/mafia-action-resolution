@@ -7,6 +7,23 @@ class Player:
 		self.cast_abilities = []
 		self.targetted_by = []
 
+	def get_components(self):
+		cast_abilities = []
+
+		for ability in self.cast_abilities:
+			cast_abilities.append(ability.get_components())
+
+		components = {
+			"name": self.name,
+			"status": self.status,
+			"alignment": self.alignment,
+			"role": self.role,
+			"cast_abilities": cast_abilities,
+			"targetted_by": self.targetted_by
+		}
+
+		return components
+
 	def __name__(self):
 		return self.name
 

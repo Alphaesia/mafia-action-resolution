@@ -10,34 +10,25 @@ class Ability:
 		self.return_message = ""
 		self.priority = 0
 
-	def print_components(self):
-		print("Ability: %s (%s)" % (self.__class__.__name__, self))
-		print("""	caster: %s (%s)""" % (self.caster.__name__(), self.caster))
-		print("""	executed: %s""" % self.executed)
-		print("""	success: %s""" % self.success)
-		print("""	resolved: %s""" % self.resolved)
-		print("""	modifiable: %s""" % self.modifiable)
-		print("""	modified_by: %s""" % self.modified_by)
-		print("""	actions: [""")
+	def get_components(self):
+		actions = []
 
 		for action in self.actions:
-			print("""		action: %s""" % action)
-			print("""			type: %s""" % action.type)
-			print("""			target: %s (%s)""" % (action.target.__name__(), action.target))
+			actions.append(action.get_components())
 
-			if (action.target_action is not None and action.target_action != "*"):
-				print("""			target_action: %s (%s)""" % (action.target_action.__name__(), action.target_action))
-			else:
-				print("""			target_action: %s""" % action.target_action)
+		components = {
+			"caster": (self.caster.__name__(), self.caster),
+			"executed": self.executed,
+			"success": self.success,
+			"resolved": self.resolved,
+			"modifiable": self.modifiable,
+			"modified_by": self.modified_by,
+			"actions": actions,
+			"return_message": self.return_message,
+			"priority": self.priority
+		}
 
-			print("""			component: %s""" % action.component)
-			print("""			new_value: %s""" % action.new_value)
-			print("""			returned_value: %s""" % action.returned_value)
-
-		print("""	]""")
-		print("""	return_message: %s""" % self.return_message)
-		print("""	priority: %s""" % self.priority)
-		print("")
+		return components
 
 	def connect_to_targets(self):
 		for action in self.actions:
@@ -83,8 +74,8 @@ class Action:
 		components = {
 			"action": self.__class__.__name__,
 			"type": self.type,
-			"target": self.target,
-			"target_action": self.target_action,
+			"target": (self.target.__name__(), self.target),
+			"target_action": (self.target_action.__class__.__name__, self.target_action),
 			"component": self.component,
 			"new_value": self.new_value,
 			"returned_value": self.returned_value
