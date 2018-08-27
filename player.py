@@ -5,6 +5,7 @@ class Player:
 		self.alignment = alignment
 		self.role = role
 		self.cast_abilities = []
+		self.targetted_by = []
 
 	def __name__(self):
 		return self.name

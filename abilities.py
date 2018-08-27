@@ -39,6 +39,11 @@ class Ability:
 		print("""	priority: %s""" % self.priority)
 		print("")
 
+	def connect_to_targets(self):
+		for action in self.actions:
+			action.target.targetted_by.append(self)
+
+
 	def resolve(self):
 		for action in self.actions:
 			if (self.modified_by):
@@ -73,6 +78,18 @@ class Action:
 		else:
 			self.new_value = None
 		self.returned_value = None
+
+	def get_components(self):
+		components = {
+			"action": self.__class__.__name__,
+			"type": self.type,
+			"target": self.target,
+			"target_action": self.target_action,
+			"component": self.component,
+			"new_value": self.new_value,
+			"returned_value": self.returned_value
+		}
+		return components
 
 
 
