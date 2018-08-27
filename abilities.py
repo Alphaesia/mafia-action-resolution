@@ -24,6 +24,12 @@ class Ability:
 			print("""		action: %s""" % action)
 			print("""			type: %s""" % action.type)
 			print("""			target: %s (%s)""" % (action.target.__name__(), action.target))
+
+			if (action.target_action is not None and action.target_action != "*"):
+				print("""			target_action: %s (%s)""" % (action.target_action.__name__(), action.target_action))
+			else:
+				print("""			target_action: %s""" % action.target_action)
+
 			print("""			component: %s""" % action.component)
 			print("""			new_value: %s""" % action.new_value)
 			print("""			returned_value: %s""" % action.returned_value)
@@ -52,8 +58,16 @@ class Ability:
 class Action:
 	def __init__(self, type, target, component, *new_value):
 		self.type = type
-		self.target = target
+
+		if (isinstance(target, tuple)):
+			self.target = target[0]
+			self.target_action = target[1]
+		else:
+			self.target = target
+			self.target_action = None
+
 		self.component = component
+
 		if new_value:
 			self.new_value = new_value
 		else:
@@ -83,8 +97,6 @@ class InvestigateRole(Ability):
 		self.caster = caster
 		for target in targets:
 			self.actions.append(Action("get", target, "role"))
-		# self.target = target
-		# self.action = Action("get", "role")
 
 	def interpret_results(self, action):
 		return "You investigated %s and found them to be a %s. " % (action.target.__name__(), action.returned_value.__class__.__name__)
@@ -97,7 +109,4 @@ class BlockRole(Ability):
 
 		self.caster = caster
 		for target in targets:
-			for ability in target.cast_abilities:
-				print(target)
-				print(ability)
-				self.actions.append(Action("alter", ability, "executed", False))
+			self.actions.append(Action("alter", (target, "*"), "executed", False))
