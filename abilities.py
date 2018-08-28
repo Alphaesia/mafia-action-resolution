@@ -12,9 +12,13 @@ class Ability:
 
 	def get_components(self):
 		actions = []
+		modified_by = []
 
 		for action in self.actions:
 			actions.append(action.get_components())
+
+		for action in self.modified_by:
+		 	modified_by.append((action.__class__.__name__, action))
 
 		components = {
 			"caster": (self.caster.__name__(), self.caster),
@@ -22,7 +26,7 @@ class Ability:
 			"success": self.success,
 			"resolved": self.resolved,
 			"modifiable": self.modifiable,
-			"modified_by": self.modified_by,
+			"modified_by": modified_by,
 			"actions": actions,
 			"return_message": self.return_message,
 			"priority": self.priority
@@ -40,22 +44,38 @@ class Ability:
 
 	def resolve(self, *ability_chain):
 		def execute():
-			if (action.type == "get"):
+			print("Executing ability: " + str(self))
+			if (self.executed == True):
+				if (action.type == "get"):
 					action.returned_value = getattr(action.target, action.component)
 					self.return_message += str(self.interpret_results(action))
 					self.success = True
 					self.resolved = True
+					return
+			else:
+				self.return_message = "No Result"
+				self.success = False
+				self.resolved = True
+				return
+
+		print("Resolving ability: " + str(self))
 
 		if (not ability_chain):
-			print("NO ABILITY CHAIN")
+			ability_chain = [self]
+			print("No ability chain, start of ability chain: " + str(ability_chain))
+		else:
+			print("Ability chain: " + str(ability_chain))
 
 		for action in self.actions:
 			if (self.modified_by):
 				for ability in self.modified_by:
 					if (ability not in ability_chain):
-						ability.resolve()
-			else:
-				execute()
+						print(ability_chain)
+						ability_chain.append(ability)
+						ability.resolve(ability_chain)
+						ability_chain.pop()
+			
+			execute()
 
 	def interpret_results(self):
 		NotImplemented
@@ -128,3 +148,6 @@ class BlockRole(Ability):
 		self.caster = caster
 		for target in targets:
 			self.actions.append(Action("alter", (target, "*"), "executed", False))
+
+	def interpret_results(self, action):
+		return "You blocked %s" % action.target.__name__()

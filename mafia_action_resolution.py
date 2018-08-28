@@ -1,5 +1,3 @@
-from pprint import PrettyPrinter
-
 import player
 import roles
 
@@ -11,9 +9,9 @@ def finalise_abilities(players):
 def resolve_abilities(players):
 	for player in players:
 		for ability in player.cast_abilities:
+			print("Resolving: " + player.__name__())
 			ability.resolve()
 			print(ability.caster.__name__() + ": " + ability.return_message)
-		PrettyPrinter(indent=4).pprint(player.get_components())
 
 players = []
 
@@ -29,3 +27,5 @@ PlayerC.cast(PlayerC.role.abilities["block"], (PlayerA,))
 
 finalise_abilities(players)
 resolve_abilities(players)
+
+player.print_players(players)
