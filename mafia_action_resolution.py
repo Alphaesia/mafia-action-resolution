@@ -21,7 +21,7 @@ PlayerC = player.Player("Zatharel", "mafia", roles.Roleblocker())
 
 players.extend((PlayerA, PlayerB, PlayerC))
 
-PlayerA.cast(PlayerA.role.abilities["investigate"], (PlayerB, PlayerA))
+PlayerA.cast(PlayerA.role.abilities["investigate"], (PlayerB,))
 PlayerB.cast(PlayerB.role.abilities["investigate"], (PlayerA, PlayerC))
 PlayerC.cast(PlayerC.role.abilities["block"], (PlayerA,))
 

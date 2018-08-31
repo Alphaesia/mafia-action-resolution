@@ -38,26 +38,13 @@ class Ability:
 		for action in self.actions:
 			action.target.targetted_by.append(self)
 			if (action.target_ability == "*"):
+				action.target_ability = []
 				for target_ability in action.target.cast_abilities:
+					action.target_ability.append(target_ability)
 					target_ability.modified_by.append(self)
 
 
 	def resolve(self, *ability_chain):
-		def execute():
-			print("Executing ability: " + str(self))
-			if (self.executed == True):
-				if (action.type == "get"):
-					action.returned_value = getattr(action.target, action.component)
-					self.return_message += str(self.interpret_results(action))
-					self.success = True
-					self.resolved = True
-					return
-			else:
-				self.return_message = "No Result"
-				self.success = False
-				self.resolved = True
-				return
-
 		print("Resolving ability: " + str(self))
 
 		if (not ability_chain):
@@ -66,16 +53,41 @@ class Ability:
 		else:
 			print("Ability chain: " + str(ability_chain))
 
+		# Resolve abilities that directly affect this ability
 		for action in self.actions:
+			print("Resolving action: " + str(action))
 			if (self.modified_by):
 				for ability in self.modified_by:
 					if (ability not in ability_chain):
-						print(ability_chain)
+						print("APPENDING ABILITY TO CHAIN")
 						ability_chain.append(ability)
+						print("RESOLVING ABILITY")
 						ability.resolve(ability_chain)
+						print("POPPING ABILITY FROM CHAIN")
 						ability_chain.pop()
-			
-			execute()
+		
+		# Resolve this ability
+		if (self.executed == True):
+			print("Executing ability: " + str(self))
+			for action in self.actions:
+				print("Executing action: " + str(action))
+				if (action.type == "get"):
+					action.returned_value = getattr(action.target, action.component)
+					self.return_message += str(self.interpret_results(action))
+					self.success = True
+					self.resolved = True
+				elif (action.type == "alter"):
+					execute = "action.target.target_ability[1][0] = " + str(action.target.new_value)
+					print(execute)
+					exec(execute)
+					# exec("print(action.target." + action.component + ")")
+					# print(action.new_value)
+					# action.target.component = action.new_value
+					pass
+		else:
+			self.return_message = "No Result"
+			self.success = False
+			self.resolved = True
 
 	def interpret_results(self):
 		NotImplemented
@@ -102,52 +114,12 @@ class Action:
 
 	def get_components(self):
 		components = {
-			"action": self.__class__.__name__,
+			"action": (self.__class__.__name__, self),
 			"type": self.type,
 			"target": (self.target.__name__(), self.target),
-			"target_ability": (self.target_ability.__class__.__name__, self.target_ability),
+			"target_ability": self.target_ability,
 			"component": self.component,
 			"new_value": self.new_value,
 			"returned_value": self.returned_value
 		}
 		return components
-
-
-
-
-class InvestigateAlignment(Ability):
-	def __init__(self, caster, targets):
-		# Initialises variables from superclass
-		super().__init__()
-
-		self.caster = caster
-		for target in targets:
-			self.actions.append(Action("get", target, "alignment"))
-
-	def interpret_results(self, action):
-		return "You investigated %s and found them to be %s. " % (action.target.__name__(), action.returned_value)
-
-class InvestigateRole(Ability):
-	def __init__(self, caster, targets):
-		# Initialises variables from superclass
-		super().__init__()
-
-		self.caster = caster
-		for target in targets:
-			self.actions.append(Action("get", target, "role"))
-
-	def interpret_results(self, action):
-		return "You investigated %s and found them to be a %s. " % (action.target.__name__(), action.returned_value.__class__.__name__)
-
-
-class BlockRole(Ability):
-	def __init__(self, caster, targets):
-		# Initialises variables from superclass
-		super().__init__()
-
-		self.caster = caster
-		for target in targets:
-			self.actions.append(Action("alter", (target, "*"), "executed", False))
-
-	def interpret_results(self, action):
-		return "You blocked %s" % action.target.__name__()

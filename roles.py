@@ -1,4 +1,5 @@
 import abilities
+import custom_abilities as abilities
 
 class Role:
 	def __init__(self):
